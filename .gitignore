@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment folder
+venv/
+
+# Pytest cache and reports
+.pytest_cache/
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+
+# Playwright artifacts (optional, if you generate traces/screenshots)
+playwright-report/
+trace.zip
+screenshots/
+
+# VSCode settings (if you use VSCode)
+.vscode/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+
+# Environment variables file (if any)
+.env
