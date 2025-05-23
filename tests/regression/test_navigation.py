@@ -1,20 +1,20 @@
 import mylib.helpers as helper
 
 def test_navigation_and_content(page):
-        
-        # 1. Navigate to the homepage and check title and URL
-        page.goto("https://randomuser.me/")
-        helper.check_title_and_url(page, "Random User Generator | Home", "https://randomuser.me/")
 
-        # 2. Navigate to user photos
-        page.click("text=Photos")
-        helper.check_title_and_url(page, "Random User Generator | Photos", "https://randomuser.me/photos")
+    # 1. Navigate to the homepage and check title and URL
+    page.goto("https://randomuser.me/")
+    helper.check_title_and_url(page, "Random User Generator | Home", "https://randomuser.me/")
 
-        # 3. Navigate to documentation
-        page.click("text=Documentation")
-        helper.check_title_and_url(page, "Random User Generator | Documentation", "https://randomuser.me/documentation")
+    # 2. Navigate to user photos
+    page.click("text=Photos")
+    helper.check_title_and_url(page, "Random User Generator | Photos", "https://randomuser.me/photos")
 
-        # Można w ten sposób sprawdzić pozostałe zakładki
+    # 3. Navigate to documentation
+    page.click("text=Documentation")
+    helper.check_title_and_url(page, "Random User Generator | Documentation", "https://randomuser.me/documentation")
+
+    # Można w ten sposób sprawdzić pozostałe zakładki
 
 
 def test_card_data_changes_on_refresh(page):
