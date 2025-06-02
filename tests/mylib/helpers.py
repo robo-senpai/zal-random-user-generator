@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime, timezone
 
 def check_status(url: str, expected_status: int = 200):
     response = requests.get(url)
@@ -35,11 +36,15 @@ def get_data_snapshot(page, selector):
 def get_card_data(page):
     return get_data_snapshot(page, "#values_list li")
 
-def fetch_json_data(context, url):
-    response = context.get(url)
+def fetch_json_data(_, url):
+    response = requests.get(url)
+    response.raise_for_status() # Ensure we raise an error for bad responses
     return response.json()
 
 def find_key_in_dict(data, key):
+
+    """Recursively search for a key in a nested dictionary or list."""
+
     if isinstance(data, dict):
         if key in data:
             return data[key]
@@ -53,3 +58,23 @@ def find_key_in_dict(data, key):
             if result is not None:
                 return result
     return None
+
+def calculate_years(date_input):
+    
+    print(f"[DEBUG] date_input: {date_input} ({type(date_input)})")
+
+    """Calculate the number of years from a given date to today."""
+
+    # first find the date in the json data (search by key 'dob' or 'registered'), result is a dictionary with 'date' key
+    # convert date string to datetime object
+    if isinstance(date_input, dict):
+        date_str = date_input.get("date", "")
+    else:
+        date_str = date_input
+    date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+    now = datetime.now(timezone.utc)
+
+    # calculate the difference in years
+    difference = now - date
+    years = difference.days // 365
+    return years

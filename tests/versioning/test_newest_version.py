@@ -1,12 +1,14 @@
 import mylib.helpers as helper
 import pytest
-
-# N.B. Run pytest -s to see print statements
+import requests
+import json
 
 def test_version_match(page):
     # check if the latest version of the live page is 1.4
     page.goto("https://randomuser.me/changelog")
     assert "Version 1.4" in page.content(), "Version 1.4 not found in changelog"
+
+# Verify that newly added nationalities are correct
 
 NATIONALITIES = [
     ("in", "India"),
@@ -17,15 +19,16 @@ NATIONALITIES = [
 
 @pytest.mark.parametrize("nat, expected_country", NATIONALITIES)
 def test_new_nationalities(request_context, nat, expected_country):
+
+    """Test to ensure that newly added nationalities are correct in the latest version 1.4."""
     
-    # Check if the India data is available in the latest version 1.4
     url = f"https://randomuser.me/api/?nat={nat}"
     data = helper.fetch_json_data(request_context, url)
     country = data["results"][0]["location"]["country"]
     assert country == expected_country, f"Expected country '{expected_country}', got {country}"
     print("Country 1.4:", country)
 
-    # Comparison with the previous version 1.3
+    # Comparison with the previous version 1.3 where these nationalities were not available
     url = f"https://randomuser.me/api/1.3/?nat={nat}"
     data = helper.fetch_json_data(request_context, url)
     country = data["results"][0]["location"]["country"]
@@ -42,6 +45,8 @@ SSNNAMES = [
 
 @pytest.mark.parametrize("nat, expected_ssn_name", SSNNAMES)
 def test_foreign_ssns(request_context, nat, expected_ssn_name):
+
+    """Test to ensure that foreign social security numbers are correct in the latest version 1.4."""
     
     # Check if the foreign social security numbers added in v.1.4 are correct
     if nat == "LEGO":
@@ -53,7 +58,7 @@ def test_foreign_ssns(request_context, nat, expected_ssn_name):
     assert socialnumber["name"] == expected_ssn_name, f"Expected 'name' to be {expected_ssn_name}, got {socialnumber['name']}"
     print("Social Number 1.4:", socialnumber)
 
-    # Comparison with the previous version 1.3
+    # Comparison with the previous version 1.3 where these social security numbers were not available
     if nat == "LEGO":
         url = "https://randomuser.me/api/1.3/?lego"
     else:
@@ -62,3 +67,81 @@ def test_foreign_ssns(request_context, nat, expected_ssn_name):
     socialnumber = helper.find_key_in_dict(data, "id")
     assert socialnumber != expected_ssn_name, "Social security number should not be correct in version 1.3"
     print("Social Number 1.3:", socialnumber)
+
+
+# Test date calculations for dob and registered fields
+
+# Version 1.4 introduced a fix for the date calculations, so we need to ensure that the calculations are correct
+@pytest.mark.test123seed
+def test_dob_calculation_known():
+    url = "https://randomuser.me/api/1.4/?seed=testing123" # dob is "1993-01-14T06:19:58.502Z", age should be 32 as of 2025-06-02
+    response = requests.get(url)
+    data = response.json()
+    print(f"[DEBUG] Fetching: {url}")
+    print(json.dumps(data, indent=2))
+    dob = helper.find_key_in_dict(data, "dob")
+    print(f"DOB ver 1.4: {dob}", type(dob))
+    years = helper.calculate_years(dob)
+    print(f"Calculated years since birth: {years}")
+    print(f"Generated age: {dob['age']}")
+    assert years == dob["age"], f"Expected age to be 32, got {years}"
+
+@pytest.mark.test123seed
+def test_registered_calculation_known():
+    url = "https://randomuser.me/api/1.4/?seed=testing123" # registered date is "2004-01-09T22:06:00.202Z", age should be 21 as of 2025-06-02
+    response = requests.get(url)
+    data = response.json()
+    print(f"[DEBUG] Fetching: {url}")
+    print(json.dumps(data, indent=2))
+    reg = helper.find_key_in_dict(data, "registered")
+    years = helper.calculate_years(reg)
+    print(f"REG ver 1.4: {reg}", type(reg))
+    print(f"Calculated years since registration: {years}")
+    print(f"Registered age: {reg['age']}")
+    assert years == reg["age"], f"Expected age to be 21, got {years}"
+
+# Version 1.3 had a bug in the date calculations, so we need to ensure that the calculations are incorrect
+@pytest.mark.test123seed
+def test_dob_calculation_known_1_3():
+    url = "https://randomuser.me/api/1.3/?seed=testing123" # dob is "1990-10-09T10:25:31.134Z", age should be 34 as of 2025-06-02
+    response = requests.get(url)
+    data = response.json()
+    print(f"[DEBUG] Fetching: {url}")
+    print(json.dumps(data, indent=2))
+    dob = helper.find_key_in_dict(data, "dob")
+    print(dob)
+    years = helper.calculate_years(dob)
+    print(f"DOB ver 1.3: {dob}", type(dob))
+    print(f"Calculated years since birth: {years}")
+    print(f"Generated age: {dob['age']}")
+    # calculation was incorrect in version 1.3, so we expect the age to be 35
+    assert years != dob["age"], f"Expected age not to be 34, got {years}"
+
+@pytest.mark.test123seed
+def test_registered_calculation_known_1_3():
+    url = "https://randomuser.me/api/1.3/?seed=testing123" # registered date is "2003-10-14T23:46:05.735Z", age should be 21 as of 2025-06-02
+    response = requests.get(url)
+    data = response.json()
+    print(f"[DEBUG] Fetching: {url}")
+    print(json.dumps(data, indent=2))
+    reg = helper.find_key_in_dict(data, "registered")
+    years = helper.calculate_years(reg)
+    print(f"REG ver 1.3: {reg}", type(reg))
+    print(f"Calculated years since registration: {years}")
+    print(f"Registered age: {reg['age']}")
+    # calculation was incorrect in version 1.3, so we expect the age to be 22
+    assert years != reg["age"], f"Expected age not to be 5, got {reg['age']}"
+
+def test_dob_calculation_random(request_context):
+    """Test to ensure that the date of birth calculation is correct for random data."""
+    
+    url = "https://randomuser.me/api"
+    data = helper.fetch_json_data(request_context, url)
+    print(f"[DEBUG] Fetching: {url}")
+    print(json.dumps(data, indent=2))
+    dob = helper.find_key_in_dict(data, "dob")
+    years = helper.calculate_years(dob)
+    print(f"Random DOB ver 1.4: {dob}", type(dob))
+    print(f"Calculated years since registration: {years}")
+    print(f"Generated age: {dob['age']}")
+    assert years == dob["age"], f"Expected age to be {dob['age']}, got {years}"
