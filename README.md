@@ -28,10 +28,18 @@ Test suite has been divided into three sections:
    ```bash
    pip install -r requirements.txt
 
-## Running the tests
+## Running the tests (Windows)
 
 Some tests are marked with a custom marker (test123seed) - these have been created in order to test the calculation logic on existing seeded users, ensuring the data is constant and does not depend on the number of fetches as opposed to unseeded results.
 
 When run as part of the entire test suite, these tests affect the results of the randomized (unseeded) fetches, specifically causing the JSON data to be cut or not loading properly and the seed changing to a different, albeit constant string.
 
 In order to ensure the tests' independency it is highly recommended tests with these markers are either skipped (when running the remaining tests) or run independently if needed (without the remaining tests).
+
+The default 'pytest' command will run all tests except those marked as "test123seed" (see pytest.ini).
+
+To run all tests, use command:
+   pytest -c nul
+
+To only run tests marked with the test123seed marker, use command:
+   pytest -m test123seed
