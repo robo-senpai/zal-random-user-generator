@@ -2,6 +2,7 @@ import mylib.helpers as helper
 import pytest
 import requests
 import json
+import time
 
 
 # 1/4
@@ -169,6 +170,8 @@ def test_dob_calculation_random(request_context, i):
     print(f"Generated age: {dob['age']}")
     assert years == dob["age"], f"Expected age to be {dob['age']}, got {years}"
 
+    time.sleep(0.4)  # Sleep to avoid hitting the API too fast, can be adjusted as needed
+
 @pytest.mark.parametrize("j", range(10)) # run the test "j" times with different random data
 def test_registered_calculation_random(request_context, j):
 
@@ -189,3 +192,5 @@ def test_registered_calculation_random(request_context, j):
     print(f"Calculated years since registration: {years}")
     print(f"Generated age: {reg['age']}")
     assert years == reg["age"], f"Expected age to be {reg['age']}, got {years}"
+
+    time.sleep(0.4)

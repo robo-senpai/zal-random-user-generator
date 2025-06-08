@@ -76,5 +76,5 @@ def calculate_years(date_input):
 
     # calculate the difference in years
     difference = now - date
-    years = difference.days // 365
+    years = difference.days // 365.25
     return years
